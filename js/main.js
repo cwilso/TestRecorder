@@ -129,15 +129,15 @@ function toggleMono() {
     audioInput.connect(inputPoint);
 }
 
-function gotStream(stream) {
+function initAudio() {
+    if (!navigator.getUserMedia)
+        navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    if (!navigator.cancelAnimationFrame)
+        navigator.cancelAnimationFrame = navigator.webkitCancelAnimationFrame || navigator.mozCancelAnimationFrame;
+    if (!navigator.requestAnimationFrame)
+        navigator.requestAnimationFrame = navigator.webkitRequestAnimationFrame || navigator.mozRequestAnimationFrame;
+
     inputPoint = audioContext.createGain();
-
-    // Create an AudioNode from the stream.
-    realAudioInput = audioContext.createMediaStreamSource(stream);
-    audioInput = realAudioInput;
-    audioInput.connect(inputPoint);
-
-//    audioInput = convertToMono( input );
 
     analyserNode = audioContext.createAnalyser();
     analyserNode.fftSize = 2048;
@@ -146,24 +146,46 @@ function gotStream(stream) {
     audioRecorder = new Recorder( inputPoint );
 
     zeroGain = audioContext.createGain();
-    zeroGain.gain.value = 0.0;
+    zeroGain.gain.value = 1.0;
     inputPoint.connect( zeroGain );
     zeroGain.connect( audioContext.destination );
     updateAnalysers();
+
+    document.getElementById("osctype").addEventListener('change',changeosctype);
 }
 
-function initAudio() {
-        if (!navigator.getUserMedia)
-            navigator.getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-        if (!navigator.cancelAnimationFrame)
-            navigator.cancelAnimationFrame = navigator.webkitCancelAnimationFrame || navigator.mozCancelAnimationFrame;
-        if (!navigator.requestAnimationFrame)
-            navigator.requestAnimationFrame = navigator.webkitRequestAnimationFrame || navigator.mozRequestAnimationFrame;
-
-    navigator.getUserMedia({audio:true}, gotStream, function(e) {
-            alert('Error getting audio');
-            console.log(e);
-        });
+function changeosctype(ev) {
+    osc.type = ev.target.selectedIndex;
 }
 
+var osc = null;
+
+function startWebAudioTest() {
+    // add test code here
+
+var context = audioContext;
+
+var lfo = context.createOscillator();
+
+lfo.frequency.value = 10;
+
+var saw = context.createOscillator();
+saw.type = 'sawtooth';
+
+var filter = context.createBiquadFilter();
+filter.type = 'lowpass';
+
+var gain = context.createGainNode();
+gain.gain.value = 500;
+
+saw.connect(filter);
+lfo.connect(gain);
+gain.connect(filter.frequency);
+
+filter.connect(inputPoint);
+
+lfo.start(0);
+saw.start(0)
+
+}
 window.addEventListener('load', initAudio );

@@ -20,6 +20,8 @@
 	<canvas id="analyser" width="768" height="200"></canvas><br>
 	<canvas id="wavedisplay" width="768" height="200"></canvas><br>
 	<img id="record" width="128" height="128" src="img/mic128.png" onclick="toggleRecording(this);"><br>
+	<button onclick="startWebAudioTest()">start</button><br>
+	<select id="osctype"><option>sine<option>square<option>sawtooth<option>triangle</select>
 	<img src="img/save.svg" onclick="saveAudio();">
 </body>
 </html>
